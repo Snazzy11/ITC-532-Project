@@ -3,5 +3,5 @@
 - Edit compose/.env and replace the placeholder values with proper values.
 - Run ```cd compose && docker compose up -d --build --wait```
 
-# Teardiwn
+# Teardown
 - Run ```docker compose down``` from the compose/ directory.
