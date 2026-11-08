@@ -24,6 +24,7 @@ class EchoRequest(BaseModel):
 
 class Order(BaseModel):
     order_id: int
+    # 422 for orders
     item_name: str = Field(min_length=1)
     order_message: str = Field(min_length=1)
 
@@ -48,7 +49,7 @@ async def health():
     )
 
 @app.get("/compute/{n}")
-def compute_factorial(n: int):
+def compute_factorial(n: int): # 422 for compute
     if n == 0:
         return 1
     return n * compute_factorial(n - 1)
