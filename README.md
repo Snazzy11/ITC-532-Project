@@ -41,3 +41,10 @@ docker compose down
 | `directory` | Parker Scott | `/compute/`, `/orders` |
 | `membership` | devBurton | _added by owner_ |
 | `firstService` | dmacv3 | _added by owner_ |
+# Starting the stack
+- Run ```cp compose/.env.example compose/.env```
+- Edit compose/.env and replace the placeholder values with proper values.
+- Run ```cd compose && docker compose up -d --build --wait```
+
+# Teardown
+- Run ```docker compose down``` from the compose/ directory.
