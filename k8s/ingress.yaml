@@ -15,3 +15,10 @@ spec:
             name: api
             port:
               number: 8000
+      - path: /echo
+        pathType: Prefix
+        backend:
+          service:
+            name: firstservice
+            port:
+              number: 8000
