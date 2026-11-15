@@ -7,6 +7,11 @@ metadata:
     app: firstservice
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: firstservice
@@ -21,6 +26,9 @@ spec:
         command: ["/bin/sh", "-c", "touch /tmp/ready && exec uvicorn app:app --host 0.0.0.0 --port 8000"]
         ports:
         - containerPort: 8000
+        env:
+        - name: RELEASE
+          value: "2"
         startupProbe:
           httpGet:
             path: /health
