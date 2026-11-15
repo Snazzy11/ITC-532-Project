@@ -251,3 +251,124 @@ Compose nginx /orders 201 {'status': 'received', 'club_id': 532, 'student_name':
 Membership /orders removed: 404
 
 [exit 0]
+
+### 2
+$ kubectl delete namespace project --ignore-not-found
+namespace "project" deleted
+
+[exit 0]
+
+### 2
+$ kubectl apply -f k8s/namespace.yaml
+namespace/project created
+
+[exit 0]
+
+### 2
+$ kubectl apply -R -f k8s/
+configmap/api-config created
+deployment.apps/api created
+service/api created
+deployment.apps/cache created
+service/cache created
+deployment.apps/db created
+secret/db-credentials created
+service/db created
+deployment.apps/firstservice created
+service/firstservice created
+ingress.networking.k8s.io/project-ingress created
+deployment.apps/membership created
+service/membership created
+namespace/project unchanged
+
+[exit 0]
+
+### 2
+$ kubectl -n project wait --for=condition=Available deploy --all --timeout=180s
+deployment.apps/api condition met
+deployment.apps/cache condition met
+deployment.apps/db condition met
+deployment.apps/firstservice condition met
+deployment.apps/membership condition met
+
+[exit 0]
+
+### 2
+$ kubectl -n project get deploy\,svc\,ingress
+NAME                           READY   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/api            2/2     2            2           13s
+deployment.apps/cache          1/1     1            1           13s
+deployment.apps/db             1/1     1            1           13s
+deployment.apps/firstservice   2/2     2            2           13s
+deployment.apps/membership     2/2     2            2           13s
+
+NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE
+service/api            ClusterIP   10.43.227.185   <none>        8000/TCP   13s
+service/cache          ClusterIP   10.43.33.240    <none>        6379/TCP   13s
+service/db             ClusterIP   10.43.117.142   <none>        5432/TCP   13s
+service/firstservice   ClusterIP   10.43.253.4     <none>        8000/TCP   13s
+service/membership     ClusterIP   10.43.168.244   <none>        8000/TCP   13s
+
+NAME                                        CLASS     HOSTS   ADDRESS         PORTS   AGE
+ingress.networking.k8s.io/project-ingress   traefik   *       192.168.127.2   80      13s
+
+[exit 0]
+
+### 2
+$ kubectl -n project get pods -o wide
+NAME                            READY   STATUS    RESTARTS   AGE   IP           NODE     NOMINATED NODE   READINESS GATES
+api-f4778d7fc-lm8rd             1/1     Running   0          15s   10.42.0.56   devonb   <none>           <none>
+api-f4778d7fc-q8r54             1/1     Running   0          15s   10.42.0.57   devonb   <none>           <none>
+cache-d7bd8b557-fkf9s           1/1     Running   0          15s   10.42.0.59   devonb   <none>           <none>
+db-758dd7946-88g9b              1/1     Running   0          15s   10.42.0.58   devonb   <none>           <none>
+firstservice-58fc8db456-cm9bg   1/1     Running   0          15s   10.42.0.60   devonb   <none>           <none>
+firstservice-58fc8db456-z6gw7   1/1     Running   0          15s   10.42.0.61   devonb   <none>           <none>
+membership-658459f5bd-frr2f     1/1     Running   0          15s   10.42.0.63   devonb   <none>           <none>
+membership-658459f5bd-qtgrf     1/1     Running   0          15s   10.42.0.62   devonb   <none>           <none>
+
+[exit 0]
+
+### 2
+$ kubectl exec -n project curlbox -- curl -fsS http://api:8000/health
+{"status":"healthy","instance":"api-f4778d7fc-q8r54:9fe32a","checks":{"database":true,"cache":true}}
+[exit 0]
+
+### 2
+$ sh -c kubectl\ -n\ project\ exec\ api-f4778d7fc-lm8rd\ --\ printenv\ \|\ sort\ \|\ grep\ -E\ \'ENVIRONMENT\|CACHE_TTL\|DATABASE\'
+CACHE_TTL=30
+DATABASE_URL=postgresql://itc532:change-me@db:5432/itc532
+ENVIRONMENT=development
+
+[exit 0]
+
+### 2
+$ kubectl -n project exec membership-658459f5bd-frr2f -- rm /tmp/ready
+
+[exit 0]
+
+### 2
+$ kubectl -n project get endpointslices -l kubernetes.io/service-name=membership -o jsonpath=\{range\ .items\[\*\].endpoints\[\*\]\}\{.addresses\[0\]\}\{\"\\t\"\}\{.conditions.ready\}\{\"\\n\"\}\{end\}
+10.42.0.62	true
+10.42.0.63	false
+
+[exit 0]
+
+### 2
+$ kubectl -n project get pod membership-658459f5bd-frr2f
+NAME                          READY   STATUS    RESTARTS   AGE
+membership-658459f5bd-frr2f   0/1     Running   0          83s
+
+[exit 0]
+
+### 2
+$ kubectl -n project exec membership-658459f5bd-frr2f -- touch /tmp/ready
+
+[exit 0]
+
+### 2
+$ kubectl -n project get pods -l app=membership
+NAME                          READY   STATUS    RESTARTS   AGE
+membership-658459f5bd-frr2f   1/1     Running   0          97s
+membership-658459f5bd-qtgrf   1/1     Running   0          97s
+
+[exit 0]
