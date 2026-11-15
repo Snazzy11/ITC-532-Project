@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache
+  namespace: project
+  labels:
+    app: cache
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache
+  template:
+    metadata:
+      labels:
+        app: cache
+    spec:
+      containers:
+      - name: cache
+        image: valkey/valkey:9.1.2-alpine
+        command: ["valkey-server", "--appendonly", "yes"]
+        ports:
+        - containerPort: 6379
+        readinessProbe:
+          exec:
+            command: ["sh", "-c", "valkey-cli ping | grep -q PONG"]
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        livenessProbe:
+          exec:
+            command: ["sh", "-c", "valkey-cli ping | grep -q PONG"]
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 3
+          failureThreshold: 6
+        resources:
+          requests:
+            memory: "32Mi"
+            cpu: "25m"
+          limits:
+            memory: "192Mi"
+            cpu: "250m"
+        volumeMounts:
+        - name: valkeydata
+          mountPath: /data
+      volumes:
+      - name: valkeydata
+        emptyDir: {}
