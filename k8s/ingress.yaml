@@ -22,3 +22,10 @@ spec:
             name: firstservice
             port:
               number: 8000
+      - path: /memberships
+        pathType: Prefix
+        backend:
+          service:
+            name: membership
+            port:
+              number: 8000

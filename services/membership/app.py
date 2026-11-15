@@ -23,7 +23,7 @@ class EchoRequest(BaseModel):
     message: str
 
 
-class Order(BaseModel):
+class MembershipRequest(BaseModel):
     club_id: int = Field(gt=0)
     student_name: str = Field(min_length=2)
     student_email: str = Field(min_length=1)
@@ -60,6 +60,6 @@ async def compute(n: int):
     return {"n": n, "result": n * n}
 
 
-@app.post("/orders", status_code=201)
-async def create_order(payload: Order):
+@app.post("/memberships", status_code=201)
+async def create_membership(payload: MembershipRequest):
     return payload.model_dump()
