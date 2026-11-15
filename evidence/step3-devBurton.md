@@ -372,3 +372,84 @@ membership-658459f5bd-frr2f   1/1     Running   0          97s
 membership-658459f5bd-qtgrf   1/1     Running   0          97s
 
 [exit 0]
+
+### 3
+$ kubectl apply -f k8s/membership/deployment.yaml
+deployment.apps/membership configured
+
+[exit 0]
+
+### 3
+$ kubectl -n project rollout status deployment/membership
+Waiting for deployment "membership" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "membership" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "membership" rollout to finish: 1 out of 2 new replicas have been updated...
+Waiting for deployment "membership" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "membership" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "membership" rollout to finish: 1 old replicas are pending termination...
+deployment "membership" successfully rolled out
+
+[exit 0]
+
+### 3
+$ kubectl -n project rollout history deployment/membership
+deployment.apps/membership 
+REVISION  CHANGE-CAUSE
+1         <none>
+2         set RELEASE=2 in deployment.yaml
+
+
+[exit 0]
+
+### 3
+$ kubectl -n project set image deployment/membership membership=project/membership:v9.99.99
+deployment.apps/membership image updated
+
+[exit 0]
+
+### 3
+$ kubectl -n project rollout status deployment/membership --timeout=60s
+Waiting for deployment "membership" rollout to finish: 1 out of 2 new replicas have been updated...
+error: timed out waiting for the condition
+
+[exit 1]
+
+### 3
+$ kubectl -n project get pods -l app=membership
+NAME                          READY   STATUS         RESTARTS   AGE
+membership-75648856cc-lwtrs   0/1     ErrImagePull   0          66s
+membership-8586f4549-lvb5x    1/1     Running        0          86s
+membership-8586f4549-n9drh    1/1     Running        0          80s
+
+[exit 0]
+
+### 3
+$ kubectl -n project get deployment membership
+NAME         READY   UP-TO-DATE   AVAILABLE   AGE
+membership   2/2     1            2           8m44s
+
+[exit 0]
+
+### 3
+$ kubectl -n project rollout undo deployment/membership
+Warning: resource deployments/membership was previously managed with 'kubectl apply'. Rolling back will not update the kubectl.kubernetes.io/last-applied-configuration annotation, which may cause unexpected behavior on future 'kubectl apply' operations. Consider using 'kubectl apply' with your previous configuration file instead.
+deployment.apps/membership rolled back
+
+[exit 0]
+
+### 3
+$ kubectl -n project rollout status deployment/membership
+deployment "membership" successfully rolled out
+
+[exit 0]
+
+### 3
+$ kubectl -n project rollout history deployment/membership
+deployment.apps/membership 
+REVISION  CHANGE-CAUSE
+1         <none>
+3         set image to missing tag v9.99.99
+4         set RELEASE=2 in deployment.yaml
+
+
+[exit 0]

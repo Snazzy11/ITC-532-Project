@@ -7,6 +7,11 @@ metadata:
     app: membership
 spec:
   replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
   selector:
     matchLabels:
       app: membership
@@ -23,6 +28,9 @@ spec:
         ports:
         - name: http
           containerPort: 8000
+        env:
+        - name: RELEASE
+          value: "2"
         startupProbe:
           httpGet:
             path: /health
