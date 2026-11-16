@@ -39,5 +39,24 @@ docker compose down
 | `db` (PostgreSQL) | Parker Scott | not exposed, `backend` network only |
 | `cache` (Valkey) | Parker Scott | not exposed, `backend` network only |
 | `directory` | Parker Scott | `/compute/`, `/orders` |
-| `membership` | devBurton | _added by owner_ |
+| `membership` | devBurton | `POST /memberships` |
 | `firstService` | dmacv3 | _added by owner_ |
+
+## Membership requests
+
+The membership service takes a club ID and the student's name and email at
+`POST /memberships`.
+
+To try it with Compose:
+
+```bash
+curl -i http://localhost:8080/memberships \
+  -H 'Content-Type: application/json' \
+  -d '{"club_id":532,"student_name":"Example Student","student_email":"student@example.test"}'
+```
+
+With Kubernetes, use `http://localhost/memberships` on port 80. Ingress sends
+the request to the membership Service, which sends it to one of the two
+membership Pods on port 8000.
+
+Right now, it just checks the details and sends them back with a 201.
