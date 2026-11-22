@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: db
   namespace: project
   labels:
     app: db
 spec:
+  serviceName: db-headless
   replicas: 1
   selector:
     matchLabels:
@@ -60,6 +61,12 @@ spec:
         volumeMounts:
         - name: pgdata
           mountPath: /var/lib/postgresql
-      volumes:
-      - name: pgdata
-        emptyDir: {}
+  volumeClaimTemplates:
+  - metadata:
+      name: pgdata
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      storageClassName: local-path
+      resources:
+        requests:
+          storage: 500Mi
