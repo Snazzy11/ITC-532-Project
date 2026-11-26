@@ -6,7 +6,6 @@ metadata:
   labels:
     app: membership
 spec:
-  replicas: 2
   strategy:
     type: RollingUpdate
     rollingUpdate:

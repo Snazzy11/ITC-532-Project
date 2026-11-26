@@ -1,0 +1,31 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: membership-check
+  namespace: project
+spec:
+  backoffLimit: 6
+  ttlSecondsAfterFinished: 600
+  template:
+    metadata:
+      labels:
+        app: membership-check
+    spec:
+      restartPolicy: OnFailure
+      containers:
+      - name: check
+        image: busybox:1.38.0
+        command:
+        - /bin/sh
+        - -c
+        - |
+          wget -q -O - http://membership:8000/health |
+            grep -q '"status":"healthy"' &&
+            echo "membership-check passed"
+        resources:
+          requests:
+            memory: "16Mi"
+            cpu: "50m"
+          limits:
+            memory: "32Mi"
+            cpu: "200m"
