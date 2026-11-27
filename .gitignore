@@ -7,3 +7,16 @@ __pycache__/
 /_util/
 
 .idea/
+# State holds every managed attribute in plaintext. Never commit it.
+# The second pattern also covers terraform.tfstate.backup.
+*.tfstate
+*.tfstate.*
+
+# Provider binaries and the module cache
+.terraform/
+
+# A saved plan holds attribute values too
+tfplan
+
+# Variable files can hold credentials
+*.tfvars
